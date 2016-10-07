@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html ng-app="sampleApp">
+  <head>
+    <title>Angular Fire Basics</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="app.css">
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <!-- Angular -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/3.3.0/firebase.js"></script>
+    <!-- AngularFire -->
+    <script src="https://cdn.firebase.com/libs/angularfire/2.0.1/angularfire.min.js"></script>
+    <script>
+      // Initialize Firebase
+      var config = {
+        apiKey: "AIzaSyDYG5egh0CrduLDgoFBY9B1mRg2-_vN4XE",
+        authDomain: "test-7c333.firebaseapp.com",
+        databaseURL: "https://test-7c333.firebaseio.com",
+        storageBucket: "test-7c333.appspot.com",
+        messagingSenderId: "572970576548"
+      };
+      firebase.initializeApp(config);
+      //  ================  SAVING PHOTOS  =============== //
+      var storageRef = firebase.storage().ref();
+      var imagesRef = storageRef.child('images');
+      function previewFile(){
+        var file =document.querySelector('input[type=file]').files[0];
+        var metadata = {
+        contentType: 'image/jpeg'
+        };
+        var uploadTask = storageRef.child('images/' + file.name).put(file, metadata);
+        uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED,
+        function(snapshot) {
+            var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log('Upload is ' + progress + '% done');
+            document.getElementById('uploader').value = progress;
+            switch (snapshot.state) {
+                case firebase.storage.TaskState.PAUSED:
+                    console.log('Upload is paused');
+                    break;
+                case firebase.storage.TaskState.RUNNING:
+                    console.log('Upload is running');
+                    break;
+                  }
+              }, function(error) {
+              console.log('error while uploading')
+              }, function() {
+              var starsRef = storageRef.child('images/'+ file.name);
+              starsRef.getDownloadURL().then(function(url) {
+                  document.querySelector('#preview').src=url;
+                  var t=document.querySelector('p')
+                  t.innerHTML ='firebase storage path URL: '+url
+              }).catch(function(error) {
+                  console.log('error while downloading file');
+              });
+          });
+      }
+    </script>
+    <script type="text/javascript">
+      initApp = function() {
+        firebase.auth().onAuthStateChanged(function(user) {
+          if (user) {
+            // User is signed in.
+            var displayName = user.displayName;
+            var email = user.email;
+            var emailVerified = user.emailVerified;
+            var photoURL = user.photoURL;
+            var uid = user.uid;
+            var providerData = user.providerData;
+            user.getToken().then(function(accessToken) {
+              document.getElementById('sign-in-status').textContent = 'Signed in';
+              document.getElementById('sign-in').textContent = 'Sign out';
+              document.getElementById('account-details').textContent = JSON.stringify({
+                displayName: displayName,
+                email: email,
+                emailVerified: emailVerified,
+                photoURL: photoURL,
+                uid: uid,
+                accessToken: accessToken,
+                providerData: providerData
+              }, null, '  ');
+            });
+          } else {
+            // User is signed out.
+            document.getElementById('sign-in-status').textContent = 'Signed out';
+            document.getElementById('sign-in').textContent = 'Sign in';
+            document.getElementById('account-details').textContent = 'null';
+          }
+        }, function(error) {
+          console.log(error);
+        });
+      };
+
+      window.addEventListener('load', function() {
+        initApp()
+      });
+    </script>
+    <script src="app.js"></script>
+  </head>
+  <body ng-controller="SampleCtrl"style="padding:4em;text-align:center;">
+
+    <h1>Welcome to My Awesome App</h1>
+   <div id="sign-in-status"></div>
+   <div id="sign-in"></div>
+   <div id="account-details"></div>
+   <br>
+
+   <p id="url"> firebase storage path URL:</p>
+
+
+   <button type="button" ng-click="logout()" class="btn-default"name="button">Logout</button><button type="submit" ng-click="register()" class="btn-primary">Register to use</button><br><br>
+
+   <!-- push a new message onto the array -->
+   <form ng-submit="addMessage()">
+
+     <h3 id="name"></h3>
+
+     <div id="pic"></div><br />
+
+     <input ng-model="newMessageText" placeholder='text'/><br />
+     <textarea ng-model="newMessageBody"placeholder='body'></textarea><br />
+     <input ng-model="newMessageAuthor" placeholder='author'/><br />
+     <input ng-model="newMessageNote" placeholder='note'/><br />
+     <div class=""="top">
+
+         <input type="file" ng-model="newMessageImg" onchange="previewFile()" style="float:left;">
+         <img src="" id="preview" height="200px" width="200px" alt="Image preview..." <br>
+         <progress  value="0" max="100" id=uploader>0%</progress>
+     </div>
+     <button type="submit" class="btn-primary">Add Message</button>
+   </form>
+   <hr />
+
+    <ul id='data'>
+      <li class="displayData" ng-repeat="message in messages">
+        <!-- edit a message -->
+        <input  ng-model="message.text" ng-change="messages.$save(message)" /><br />
+        <textarea  ng-model="message.body" ng-change="messages.$save(message)"></textarea><br />
+        <input  ng-model="message.author" ng-change="messages.$save(message)" /><br />
+        <input ng-model="message.note" ng-change="messages.$save(message)" /><br />
+        <input type="text" ng-model="message.img"ng-change="messages.$save(message)" value="">
+        <!-- delete a message -->
+        <button ng-click="messages.$remove(message)">Delete Message</button>
+      </li>
+    </ul>
+
+
+
+
+
+
+
+  </body>
+</html>

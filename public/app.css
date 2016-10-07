@@ -1,0 +1,38 @@
+body {
+  padding-top: 4em;
+}
+.displayData  {
+  margin: 20px auto;
+}
+input, textarea {
+  max-width: 450px;
+  width: 90%;
+  margin:5px;
+  font-weight: bold;
+  outline: none;
+  text-align: center;
+  font-size: 1em;
+}
+#data li {
+  list-style: none;
+  background: #56c;
+  padding: 1%;
+  border-bottom: 3px solid #000;
+  max-width: 500px;
+}
+#data {
+  padding-left: 0;
+}
+form {
+  background: #aaa;
+  padding: 2em;
+  border-radius: .25em;
+  color:#000;
+}
+#pix {
+
+}
+.btn-primary {
+  border-radius: .4em;
+  outline: none;
+}
